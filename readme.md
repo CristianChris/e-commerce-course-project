@@ -1,4 +1,4 @@
-app server: 
+app server:
 IP Address: 46.101.103.101:3000
 
 web server: (proxy)
@@ -61,7 +61,7 @@ In order to run our web application you will need to do several steps:
 
 #### User Schema
 For user authentication we have used *morgan* library with the aim of logging the user requests to the webserver (e.g. access to different routes).
-For the User Schema we use mongoose, which is an *Object Relational Mapper*, which is like a virtual object database, that can be used within the node itself. Basically it connects our Node.js project with MongoDB database, without the need to implicitly connect them using additional code.
+For the User Schema we use mongoose, which is an *Object Relational Mapper*, which is like a virtual object database, that can be used within Node itself. Basically it connects our Node.js project with MongoDB database, without the need to implicitly connect them using additional code.
 
 The User Schema is defined as follows:
 ```javascript
@@ -91,9 +91,25 @@ From the Schema we can derive that the User entity is described by five characte
 In the next chapter we will explain how these characteristics are implemented and used.
 
 #### MongoDB
-Configure Database with MongoLab
+
+Our MongoDB database is a single-node deployment, hosted on ```https://mlab.com```. Here is a useful representation of our database.
+
+|     Name    |                                                                                                                                                                           Description                                                                                                                                                                           |   Value   |
+|:-----------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------:|
+| collections | Number of collections in this database                                                                                                                                                                                                                                                                                                                          | 9         |
+| objects     | Number of documents in this database                                                                                                                                                                                                                                                                                                                            | 307       |
+| indexes     | Number of indexes in this database                                                                                                                                                                                                                                                                                                                              | 10        |
+| numExtents  | Number of filesystem extents allocated for this database                                                                                                                                                                                                                                                                                                        | 13        |
+| avgObjSize  | Average document size for this database. This is the dataSize divided by the objects.                                                                                                                                                                                                                                                                           | 0.30 KB   |
+| dataSize    | Total size of all documents stored in this database, including the padding factor (does not include indexes).                                                                                                                                                                                                                                                   | 93.33 KB  |
+| storageSize | Total amount of space allocated for data for this database (does not include index storage). This number is larger than dataSize because it includes additional space (preallocation within data files as well as space left by deleted or moved documents).                                                                                                    | 392.00 KB |
+|             |                                                                                                                                                                                                                                                                                                                                                                 |           |
+| indexSize   | Total size of all indexes created on this database                                                                                                                                                                                                                                                                                                              | 95.81 KB  |
+| fileSize    | Total size of storage files used for this database. This represents the overall storage footprint for this database on disk. For servers running with the smallfiles option (we use this option on our Shared plans), the first file allocated is 16MB, the second 32MB, the third 64MB... until 512MB is reached at which point each subsequent file is 512MB. | 16.00 MB  |
 
 #### Usage of EJS
+
+
 Sed vitae nisl mauris. Mauris at enim laoreet risus faucibus aliquet. Vestibulum varius lorem et felis bibendum, sit amet convallis arcu vulputate. Praesent eget odio eget odio ultricies euismod. Ut non justo viverra, placerat tortor ac, sollicitudin lacus. Mauris at semper neque, nec porta dui. Aenean metus ligula, euismod ac sapien non, pulvinar suscipit justo. Cras sit amet eros finibus, laoreet est quis, ultricies ante. Fusce lacinia lacinia purus non egestas. Aliquam at urna nisi. Etiam vitae scelerisque quam.
 #### Adding Twitter Bootstrap
 Aenean tempus neque non neque suscipit fermentum. Nullam lacus metus, scelerisque eu leo id, tristique aliquet velit. Donec purus diam, scelerisque eu ullamcorper vestibulum, eleifend id nisi. Duis nec egestas nibh. Praesent lobortis ut magna vitae dignissim. Nunc felis arcu, interdum a interdum aliquam, viverra eget ligula. Donec tempus rutrum sem, sit amet laoreet dui rhoncus et. In hac habitasse platea dictumst. Ut porta sed quam sit amet efficitur. Cras nec neque nisi. Phasellus vitae sagittis lorem. Nulla orci lorem, maximus ut sagittis id, venenatis et metus. Curabitur condimentum venenatis dolor, quis cursus tellus efficitur sit amet. Sed id facilisis justo. Fusce finibus est nec sem blandit, quis sollicitudin arcu tristique.
@@ -104,7 +120,17 @@ Vivamus euismod ipsum et pretium posuere. Ut imperdiet pulvinar massa, vitae ult
 
 
 #### Cookie and Session usage
-Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. Donec diam quam, pretium quis rutrum et, pharetra ut ligula. Donec ut sem sapien. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam porttitor, felis at viverra vulputate, tortor dui dictum tortor, quis iaculis purus enim cursus massa. Morbi dui neque, semper ut mauris in, feugiat sodales neque. Donec et ex justo. Fusce id felis et mauris iaculis ullamcorper. Vestibulum sagittis auctor ante, ac aliquet libero rhoncus vel. Pellentesque at eros sit amet enim sollicitudin aliquet. Nunc eget venenatis metus. Vivamus non enim et dolor pretium egestas vitae id nulla. Quisque vel nisi est.
+
+The session stores data like ```user-id``` in temporary memory store (temp, local, redis, or in our case mongodb).
+The cookie parser will parse the cookie header and handle cookie separation and encoding, take the session data, encrypt it and send it to browser.
+
+Few steps are required to set up the cookie and session functionality:
+
+* install db for storing the session (library connect-mongo)
+* mongo store library is depending on express-sesion, without express-session (session) it won’t work
+* instead of saving anything to a temporary memory store, we want to save the session into MongoDB database
+* every session will be saved into DB, which is MongoDB
+* MongoStore in our case specifically stores the session on the server-side
 
 
 
@@ -120,7 +146,40 @@ Cras aliquam mi sapien, vitae sollicitudin est convallis sed. Sed a purus odio. 
 
 
 #### Async waterfall model
-In interdum enim convallis eleifend consectetur. Nunc id mi nibh. Nullam sit amet leo porta, scelerisque dolor vitae, lacinia ex. Aenean dictum justo dictum, consequat dolor a, fermentum orci. Donec non tellus vestibulum, venenatis urna at, pellentesque lectus. Ut id fringilla elit. Suspendisse egestas tortor augue. Aenean auctor condimentum augue in commodo. Donec auctor dignissim nunc ut ultricies. Phasellus at nisi nibh. Nunc consequat mi ac sagittis ullamcorper. Fusce erat ante, ultrices porta laoreet ut, dignissim a tortor. Curabitur non ante et augue ultrices aliquam vitae non arcu. Sed consequat gravida sem, quis ultricies dolor sagittis vel.
+
+This is a js module, which runs an array of functions in series, each passing their results to the next in the array. However, if any of the functions pass an error to the callback, the next function is not executed and the main callback is immediately called with the error.
+
+*Installation*
+
+* Just include async-waterfall before your scripts.
+* npm install async-waterfall if you’re using node.js.
+
+*Usage*
+
+* waterfall(tasks, optionalCallback);
+* tasks - An array of functions to run, each function is passed a callback(err, result1, result2, ...) it must call on completion. The first argument is an error (which can be null) and any further arguments will be passed as arguments in order to the next task.
+* optionalCallback - An optional callback to run once all the functions have completed. This will be passed the results of the last task's callback.
+
+```javascript
+
+var waterfall = require('async-waterfall');
+waterfall(tasks, callback);
+
+waterfall([
+  function(callback){
+    callback(null, 'one', 'two');
+  },
+  function(arg1, arg2, callback){
+    callback(null, 'three');
+  },
+  function(arg1, callback){
+    // arg1 now equals 'three'
+    callback(null, 'done');
+  }
+], function (err, result) {
+  // result now equals 'done'
+});
+```
 
 
 #### Faker API usage
@@ -128,7 +187,20 @@ Duis dictum pulvinar quam. Ut et fermentum ante. Ut laoreet sem id pulvinar moll
 
 
 #### Elastic Search
-Phasellus vel sapien et eros bibendum varius. Mauris porta elementum justo. Quisque convallis egestas gravida. Morbi a fringilla lorem. Nulla faucibus nisl ac ex efficitur feugiat. Suspendisse velit ipsum, placerat eu nibh in, eleifend iaculis nisl. Nulla tincidunt tempor ornare. Phasellus placerat augue a egestas eleifend. Fusce quis eros pulvinar, placerat mauris eu, tempor mauris.
+
+Install elastic search as follows:
+
+* brew install elasticsearch
+* not as sudo, otherwise you get a java runtime error
+
+Add plugin to our product schema:
+
+* mongoosastic ~ a library which uses elasticsearch to replicate the data from mongoDB to elasticsearch
+* it lets you search specific data using mongoosastic feature, w/o writing additional code to connect mongoosastic and mongodb
+* all within elastic search product set
+* logic defined in Product.search and Product.createMapping
+
+The mapping code maps between product DB and elasticSearch, so that it creates a “bridge” between ES replica set and Product DB. Finally we want to stream the whole data from the product to ES, so that it will replicate all data and put in ES.
 
 
 
@@ -194,19 +266,7 @@ Duis tincidunt tempor orci, quis ultrices mi gravida accumsan. Sed euismod torto
    [PlGd]: <https://github.com/joemccann/dillinger/tree/master/plugins/googledrive/README.md>
    [PlOd]: <https://github.com/joemccann/dillinger/tree/master/plugins/onedrive/README.md>
 
-#Under construction....
 
-##Saving users session:
-
-The session stores data like ```user-id``` in temporary memory store, temp, local, mongodb or redis.
-The cookie parser will parse the cookie header and handle cookie separation and encoding, take the session data, encrypt it and send it to browser.
-
-* install db for storing the session (library connect-mongo)
-* mongo store library is depending on express-sesion, without express-session (session) it won’t work)
-* instead of saving anything to a temporary memory store, we want to save the session into MongoDB database
-* every session will be saved into DB, which is MongoDB
-* MongoStore in our case specifically stores the session on the server-side 
- 
 ##Now, on the authentication library part:
 
 * The library we will use is passport.js
@@ -222,9 +282,9 @@ The cookie parser will parse the cookie header and handle cookie separation and 
 
 **Serialization** is the process of translating data structures or object states into a format that can be stored. We want to translate the data structure, which is user object and we want to translate it into a format that can be stored. Thus, we will store it in connect-mongo. So, the key of this object is provided into the 2nd argument of the callback function in serializeUser, which is user._id. Serialize function will be saved into session and it is used to retrieve the whole object via deserialize function.
 
-**Serialize function** means that data from the user object should be stored in the session. In our case, we want to store the id only and the result of the serializeUser method will be attached to the session as request with user._id --> req.user._id. Later on, if we want to access a user that we just logged in, we will type req.user. 
+**Serialize function** means that data from the user object should be stored in the session. In our case, we want to store the id only and the result of the serializeUser method will be attached to the session as request with user._id --> req.user._id. Later on, if we want to access a user that we just logged in, we will type req.user.
 
-In **deserialize** function we provide as first argument of deserialize function the same key of user object that was given to done func in serializeUser call. So, the whole object is retrieved with the help of the key. 
+In **deserialize** function we provide as first argument of deserialize function the same key of user object that was given to done func in serializeUser call. So, the whole object is retrieved with the help of the key.
 
 * First, we want to give middleware a name, so it can be recognized, later on in another route, which is local-login
 * Create a new anonymous instance of LocalStrategy object
@@ -255,12 +315,12 @@ In **deserialize** function we provide as first argument of deserialize function
 * In ```server.js``` when we add the following line:
 ```javascript
 app.use(function(req, res, next) {
-    res.locals.user = req.user;
-    next();
+    res.locals.user = req.user;
+    next();
 });
 ```
-* the user object will get available for all the routes 
-* this is instead of specifying manually (redundantly) in every needed route, an user object, like: 
+* the user object will get available for all the routes
+* this is instead of specifying manually (redundantly) in every needed route, an user object, like:
 * ```user: req.user```
 * every route will have the user object by default
 * ```res.locals.user``` , ```locals = local``` variable and user is the object we want to use and we want to make it equal to req.user, because once logged in you will have req.user based on serialize and deserialize method
@@ -280,15 +340,15 @@ app.use(function(req, res, next) {
 ##Edit-profile
 
 * the user types in the req.body.name, or the request to be changed, and according to the name of the body, the user.profile data structure is being modified accordingly
-* then simply the user data is saved and flash the message, and store the flash in the session 
+* then simply the user data is saved and flash the message, and store the flash in the session
 * so that it can be used in other routes that have success as the name of the flash as is the route ```router.get(‘/edit-profile’)``` which contains the actual render of the edit-profile.ejs file
 * redirect user back to edit-profile page
 
 ##Laying down new models:
 
-* category.js 
+* category.js
 * create a new Schema, called Category
-* this will be a model for category part 
+* this will be a model for category part
 * we want to separate between the category and a product just in case that a category model grows bigger (hundreds), you don’t want to put in in the product schema
 * next module product
 * a reason why we reference the product based on category ID is so that later on we can populate the data inside the category schema
@@ -335,27 +395,6 @@ Create our first API, so we can store all product data in the database in api.js
 * created another rout in main, to display a single page for the specified product, based on the id of the product
 
 
-##Search feature
-
-* install elastic search
-* brew install elasticsearch
-* not as sudo, or java runtime error
-
-###Add plugin to our product schema:
-* mongoosastic ~ a library which uses elasticsearch to replicate the data from mongoDB to elasticsearch
-* so you can search specific data using mongoosastic feature, w/o writing additional code to connect mongoosastic and mongodb
-* all within elastic search product set
-* so, we can later on use Product.search
-* or Product.createMapping
-
-###the mapping code is to:
-* map between product DB and elasticS, so that it creates a “bridge” between ES replica set and Product DB
-
-###Next we want to stream the whole data from the product to ES
-* it will replicate all data and put in ES
-* three methods event-driven
-
-
 ###Next we are creating a route where we will search for products;
 * ```router.post(‘/search’)``` pass the req.body.q alongside with the request
 
@@ -394,41 +433,41 @@ A **package.json** file contains meta data about your app or module. Most import
 ├── config
 ├── models
 ├── node_modules
-│   ├── async
-│   ├── connect-mongo
-│   ├── cookie
-│   ├── cookie-parser
-│   ├── cookie-signature
-│   ├── ejs
-│   ├── ejs-mate
-│   ├── elasticsearch
-│   ├── express
-│   │   ├── lib
-│   ├── express-flash
-│   │   └── lib
-│   ├── express-session
-│   │   └── session
-│   ├── faker
-│   ├── mongodb
-│   │   └── lib
-│   ├── mongoosastic
-│   │   ├── example
-│   ├── mongoose
-│   │   ├── examples
-│   │   ├── lib
-│   ├── morgan
-│   │   └── node_modules
-│   ├── passport
-│   │   └── lib
+│   ├── async
+│   ├── connect-mongo
+│   ├── cookie
+│   ├── cookie-parser
+│   ├── cookie-signature
+│   ├── ejs
+│   ├── ejs-mate
+│   ├── elasticsearch
+│   ├── express
+│   │   ├── lib
+│   ├── express-flash
+│   │   └── lib
+│   ├── express-session
+│   │   └── session
+│   ├── faker
+│   ├── mongodb
+│   │   └── lib
+│   ├── mongoosastic
+│   │   ├── example
+│   ├── mongoose
+│   │   ├── examples
+│   │   ├── lib
+│   ├── morgan
+│   │   └── node_modules
+│   ├── passport
+│   │   └── lib
 ├── public
-│   ├── css
-│   └── js
+│   ├── css
+│   └── js
 ├── routes
 └── views
-    ├── accounts
-    ├── admin
-    ├── main
-    └── partials
+    ├── accounts
+    ├── admin
+    ├── main
+    └── partials
 ```
 
 
